@@ -3,7 +3,7 @@ Orhun Utku Aydin
 
 This contribution details our methodological approach to the DEEP-PSMA challenge as part of MICCAI 2025, focusing on whole body disease burden segmentation on PSMA PET/CT. Our method follows the recommendations by the AUTOPET 3 winning solution and by the DEEP-PSMA challenge organizers for preprocessing, model training and postprocessing. We base our solution on the self-configuring ResEncM variant of nnUnet. The provided training set of 100 patients was used to train both a tracer agnostic model and tracer specific model for the FDG PET. Validation was performed on the unseen validation set of 10 patients. In summary: (1) we use a single tracer-agnostic model to segment PSMA PET lesions and a tracer specific model for FDG PET lesions, (2) we increase the patch size to 192x192x192 for better contextual understanding of the tracer agnostic model, (3) use misalignment data augmentations for the CT channel (4) predict physiological tracer uptake as a second channel in a multiclass segmentation setting (5) use recommended postprocessing strategies. The implemented methods and design choices led to improvements in the challenge metrics in our preliminary testing on the validation set. 
 
-NOTE: We use 3d fullres models and train for 1000 epochs.
+NOTE: See resources folder for model and training details: We use 3d fullres models and train for 1000 epochs.
 
 ## References
 - Isensee, F., Jaeger, P.F., Kohl, S.A.A., Petersen, J., Maier-Hein, K.H., 2021. nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nat. Methods 18, 203–211. https://doi.org/10.1038/s41592-020-01008-z 
