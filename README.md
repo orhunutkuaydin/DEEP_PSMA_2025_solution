@@ -1,29 +1,12 @@
-Example algorithm and Docker build script for baseline model of DEEP-PSMA Grand Challenge.
+# DEEP-PSMA 2025 training and inference code 
+Orhun Utku Aydin
+
+This contribution details our methodological approach to the DEEP-PSMA challenge as part of MICCAI 2025, focusing on whole body disease burden segmentation on PSMA PET/CT. Our method follows the recommendations by the AUTOPET 3 winning solution and by the DEEP-PSMA challenge organizers for preprocessing, model training and postprocessing. We base our solution on the self-configuring ResEncM variant of nnUnet. The provided training set of 100 patients was used to train both a tracer agnostic model and tracer specific model for the FDG PET. Validation was performed on the unseen validation set of 10 patients. In summary: (1) we use a single tracer-agnostic model to segment PSMA PET lesions and a tracer specific model for FDG PET lesions, (2) we increase the patch size to 192x192x192 for better contextual understanding of the tracer agnostic model, (3) use misalignment data augmentations for the CT channel (4) predict physiological tracer uptake as a second channel in a multiclass segmentation setting (5) use recommended postprocessing strategies. The implemented methods and design choices led to improvements in the challenge metrics in our preliminary testing on the validation set. 
+
+## References
+- Isensee, F., Jaeger, P.F., Kohl, S.A.A., Petersen, J., Maier-Hein, K.H., 2021. nnU-Net: a self-configuring method for deep learning-based biomedical image segmentation. Nat. Methods 18, 203–211. https://doi.org/10.1038/s41592-020-01008-z 
+- Kovacs, B., Netzer, N., Baumgartner, M., Schrader, A., Isensee, F., Weißer, C., Wolf, I., Görtz, M., Jaeger, P.F., Schütz, V., Floca, R., Gnirs, R., Stenzinger, A., Hohenfellner, M., Schlemmer, H.-P., Bonekamp, D., Maier-Hein, K.H., 2023. Addressing image misalignments in multi-parametric prostate MRI for enhanced computer-aided diagnosis of prostate cancer. Sci. Rep. 13, 19805. https://doi.org/10.1038/s41598-023-46747-z 
+- Rokuss, M., Kovacs, B., Kirchhoff, Y., Xiao, S., Ulrich, C., Maier-Hein, K.H., Isensee, F., 2024. From FDG to PSMA: A Hitchhiker’s Guide to Multitracer, Multicenter Lesion Segmentation in PET/CT Imaging. https://doi.org/10.48550/arXiv.2409.09478 
+- Sartor, O., Bono, J. de, Chi, K.N., Fizazi, K., Herrmann, K., Rahbar, K., Tagawa, S.T., Nordquist, L.T., Vaishampayan, N., El-Haddad, G., Park, C.H., Beer, T.M., Armour, A., Pérez-Contreras, W.J., DeSilvio, M., Kpamegan, E., Gericke, G., Messmann, R.A., Morris, M.J., Krause, B.J., 2021. Lutetium-177–PSMA-617 for Metastatic Castration-Resistant Prostate Cancer. N. Engl. J. Med. 385, 1091–1103. https://doi.org/10.1056/NEJMoa2107322 
 
 
-To test working algorithm ensure git lfs is installed and clone from command:
-```
-git lfs clone https://github.com/Peter-MacCallum-Cancer-Centre/DEEP-PSMA-Algorithm.git
-```
-
-
-Before running, edit script 00_copy_example_cases_to_input_format.py line to match the appropriate location of the downloaded training data:
-
-```
-top='../CHALLENGE_DATA' #update to location of training data folder top directory as distributed. Subdirectories per case of the form 'train_XXXX'
-```
-There should now be input image data (*.mha) and json files in the test/input/interf0 subdirectory. 
-
-That will populate the testing input directory with one case of PSMA and FDG image, threshold, organ segmentation, and image registration files in the format and directory structure as they are available on the grand challenge platform. Some explanation of the heirarchy and sample script to read in the relevant input sockets is available in the main inference.py script.
-
-To test building a docker container once a sample case has been copied to input, run 01_do_build.sh which will build a docker environment based on Pytorch with gpu drivers and nnUNet dependencies as well as copy the supplementary script/model files into the image. This will take a little while on first run to resolve the packages.
-
-If that completes successfully, running 02_do_test_run.sh will deploy the algorithm on the test case (copied from script 00) and output the predicted PSMA and FDG disease segmentation images into /test/output/
-
-The heirarchy of output folders will map to the required sockets to match evaluation scripts on Grand Challenge. Overall, users should be able to focus on modifying the interf0_handler() function in the inference.py script which collects all of the case image data as SITK image objects, relevant segmentation thresholds, and the Euler 3D rigid registration objects before running our example inference function and saving out the two labels needed for evaluation.
-
-Once modified, it should be possible amend the Dockerfile commands to include any additional packages or pip modules (also via requirements.txt) and re-test the build process.
-
-Once the algorithm build and test scripts are working with your updated method, the 03_do_save.sh script will save the docker image to a tarball tar.gz for submission on Grand Challenge. Given the large file size of the tar container images, there is also a functionality to save elements of the required scripts into the model/ folder which will be archived separately and can be attached along with the larger image file when uploading a submission. This allows for updating an algorithm on the grand challenge portal without re-uploading the full container image (10+ GB). For setting up a first working algorithm, it may be best to simplify the process and store all model weights in the resources/ folder (saved into container by default in this example) or another subdirectory and update the dockerfile copy statements accordingly.
-
-Building the tar image will take some time to complete and ensure that it has finished successfully before uploading to the platform. Once that's complete, follow the [instructions](https://deep-psma.grand-challenge.org/how-to-submit-your-algorithm/) here or on the grand challenge documentation pages. It is strongly recommended to complete one working debug submission to verify output on training cases 25, 60 and 83 before proceeding to the validation or testing leaderboard submissions.
